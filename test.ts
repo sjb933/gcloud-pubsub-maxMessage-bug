@@ -32,11 +32,10 @@ const pubsub = new PubSub({ projectId: GOOGLE_PROJECT_ID });
             processingCount--;
             message.ack();
         }, 1000)
-        message.ack();
     });
 
     // Validator
-    setInterval(() => {
+    const validator = setInterval(() => {
         if (processingCount > maxMessages) {
             console.log(`ERROR: Concurrently processing ${processingCount} messages (flowControl.maxMessages = ${maxMessages})`)
         } else {
@@ -45,6 +44,7 @@ const pubsub = new PubSub({ projectId: GOOGLE_PROJECT_ID });
 
         if (firstMessageReceived && processingCount === 0) { // Cleanup code
             console.log(`Deleting test topic: ${topicName}`)
+            clearInterval(validator);
             topic.delete().then(() => process.exit(0));
         }
     }, 500)
